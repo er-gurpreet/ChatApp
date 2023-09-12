@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Gilroy";
+    }
+
+    html,body{
+      width: 100%;
+      height: 100%;
+    }
+
+    #main{
+      width: 100%;
+      height: 100%;
+    }
+
+    #overlap{
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background-color: #0000004c
+    }
+
+    .card{
+      padding: 20px;
+      width: 300px;
+      background-color: #fff;
+    }
+
+    .card input{
+      padding: 10px 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      width: 100%;
+      height: 60px;
+      margin-bottom: 10px;
+      outline: none;
+      border: 1px solid #dadada;
+      border-radius: 10px;
+    }
+
+    #setname{
+      border: none;
+      font-size: 1.09rem;
+      font-weight: 600;
+      width: 100%;
+      height: 40px;
+      background-color: rgb(47, 182, 235);
+      color: #fff;
+    }
+
+    #msg-area{
+      padding: 13px 20px;
+      width: 100%;
+      height: 75%;
+    }
+
+    .textarea{
+      padding: 13px 20px;
+      width: 100%;
+      height: 12%;
+      color: #333;
+      background-color: #dadada;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: 1px solid #777777;
+    }
+
+    #send{
+      width: 100%;
+      height: 8%;
+      background-color: rgb(50, 181, 232);
+      color: #fff;
+      border: none;
+      font-size: 1.09rem;
+    }
+    .msg{
+      padding: 10px 15px;
+      width: fit-content;
+      background-color: rgb(24, 82, 255);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    #menu{
+      position: absolute;
+      right: 5%;
+      top: 5%;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    #menu>h1{
+      font-size: 1rem;
+      margin-right: 20px;
+    }
+
+    #onlineuser{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+    }
+  </style>
+</head>
+<body>
+  <div id="overlap">
+    <div class="card">
+      <input id="inputname" type="text" placeholder="Write you Name.....">
+      <button id="setname">Set Name</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="msg-area">
+      <div id="menu">
+        <i class="ri-user-line"></i>
+        <h1></h1>
+        <div id="onlineuser">
+          <i class="ri-user-smile-fill"></i>
+          <span id="onlinenumber">20</span>
+          <i class="ri-arrow-down-s-fill"></i>
+        </div>
+      </div>
+      <div class="msg">Hello</div>
+    </div>
+    <textarea class="textarea" placeholder="Write your message here !"></textarea>
+    <button id="send">Send Message</button>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    let socket = io();
+    let text = document.querySelector(".textarea");
+    let name;
+    
+    document.querySelector("#send").addEventListener("click", () =>{
+      socket.emit("message", {username: name,textval: text.value})
+      text.value = "";
+    });
+
+    socket.on("msg", (data) => {
+      let div = document.createElement("div");
+      div.classList.add("msg");
+      div.textContent = `${data.username}: ${data.textval}`;
+      document.querySelector("#msg-area").appendChild(div);
+    })
+
+    document.querySelector("#setname").addEventListener("click",()=>{
+      let testname = document.querySelector("#inputname");
+      if(testname.value.trim().length > 3){
+        name = testname.value;
+        document.querySelector("#menu h1").innerHTML = name;
+        document.querySelector("#overlap").style.display = "none";
+        document.querySelector("#menu").style.display = "flex";
+        socket.emit("usercreated");
+      }
+    })
+
+    socket.on("online",(data)=>{
+      document.querySelector("#onlinenumber").textContent = data;
+    })
+  </script>
+</body>
+</html>     
